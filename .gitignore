@@ -84,6 +84,13 @@ sm64config.txt
 # visual studio
 build-windows-visual-studio/.vs
 
+# visual studio code
+.vscode/
+
+# clangd
+compile_commands.json
+.cache/clangd/
+
 # misc
 todo.txt
 todo-old.txt
