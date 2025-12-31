@@ -1,0 +1,3 @@
+[submodule "lib/juice/src"]
+	path = lib/juice/src
+	url = https://github.com/paullouisageneau/libjuice.git

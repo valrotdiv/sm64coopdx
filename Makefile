@@ -930,6 +930,19 @@ endif
 
 # Coop specific libraries
 
+# Enter the libraries without the lib prefix, all library configs are in lib folder
+STATIC_LIBRARIES := lua
+SHARED_LIBRARIES :=
+# CoopNet
+ifeq ($(COOPNET),1)
+  STATIC_LIBRARIES += coopnet
+  SHARED_LIBRARIES +=
+# Include juice if coopnet is static
+  ifneq (,$(findstring coopnet, $(STATIC_LIBRARIES)))
+    STATIC_LIBRARIES += juice
+  endif
+endif
+
 # Zlib
 LDFLAGS += -lz
 
@@ -940,62 +953,21 @@ else
   LDFLAGS += -lcurl
 endif
 
-# Lua
+# Include directory for static libraries
+LDFLAGS += -L$(BUILD_DIR)/lib
+
 ifeq ($(WINDOWS_BUILD),1)
-  ifeq ($(TARGET_BITS), 32)
-    LDFLAGS += -Llib/lua/win32 -l:liblua53.a
-  else
-    LDFLAGS += -Llib/lua/win64 -l:liblua53.a
-  endif
+  LDFLAGS += $(foreach name, $(STATIC_LIBRARIES), -l:lib$(name).a) -lbcrypt -liphlpapi
 else ifeq ($(OSX_BUILD),1)
-  ifeq ($(shell uname -m),arm64)
-    LDFLAGS += -L./lib/lua/mac_arm/ -l lua53
-  else
-    LDFLAGS += -L./lib/lua/mac_intel/ -l lua53
-  endif
-else ifeq ($(TARGET_RPI),1)
-	ifneq (,$(findstring aarch64,$(machine)))
-    LDFLAGS += -Llib/lua/linux -l:liblua53-arm64.a
-  else
-    LDFLAGS += -Llib/lua/linux -l:liblua53-arm.a
-  endif
-else ifeq ($(TARGET_RK3588),1)
-  LDFLAGS += -Llib/lua/linux -l:liblua53-arm64.a
+  LDFLAGS += $(foreach name, $(STATIC_LIBRARIES), -l $(name))
+else ifneq ($(TARGET_RPI)$(TARGET_RK3588),)
+  LDFLAGS += $(foreach name, $(STATIC_LIBRARIES), -l:lib$(name).a)
 else
-  LDFLAGS += -Llib/lua/linux -l:liblua53.a -ldl
+  LDFLAGS += $(foreach name, $(STATIC_LIBRARIES), -l:lib$(name).a) -ldl
 endif
 
-# CoopNet
+# CoopNet (COOPNET_LIBS No longer needed)
 COOPNET_LIBS :=
-ifeq ($(COOPNET),1)
-  ifeq ($(WINDOWS_BUILD),1)
-    ifeq ($(TARGET_BITS), 32)
-      LDFLAGS += -Llib/coopnet/win32 -l:libcoopnet.a -l:libjuice.a -lbcrypt -liphlpapi
-    else
-      LDFLAGS += -Llib/coopnet/win64 -l:libcoopnet.a -l:libjuice.a -lbcrypt -liphlpapi
-    endif
-  else ifeq ($(OSX_BUILD),1)
-    ifeq ($(shell uname -m),arm64)
-      LDFLAGS += -Wl,-rpath,@loader_path -L./lib/coopnet/mac_arm/ -l coopnet
-      COOPNET_LIBS += ./lib/coopnet/mac_arm/libcoopnet.dylib
-      COOPNET_LIBS += ./lib/coopnet/mac_arm/libjuice.1.6.2.dylib
-    else
-      LDFLAGS += -Wl,-rpath,@loader_path -L./lib/coopnet/mac_intel/ -l coopnet
-      COOPNET_LIBS += ./lib/coopnet/mac_intel/libcoopnet.dylib
-      COOPNET_LIBS += ./lib/coopnet/mac_intel/libjuice.1.6.2.dylib
-    endif
-  else ifeq ($(TARGET_RPI),1)
-    ifneq (,$(findstring aarch64,$(machine)))
-      LDFLAGS += -Llib/coopnet/linux -l:libcoopnet-arm64.a -l:libjuice-arm64.a
-    else
-      LDFLAGS += -Llib/coopnet/linux -l:libcoopnet-arm.a -l:libjuice-arm.a
-    endif
-  else ifeq ($(TARGET_RK3588),1)
-    LDFLAGS += -Llib/coopnet/linux -l:libcoopnet-arm64.a -l:libjuice.a
-  else
-    LDFLAGS += -Llib/coopnet/linux -l:libcoopnet.a -l:libjuice.a
-  endif
-endif
 
 # Network/Discord (ugh, needs cleanup)
 ifeq ($(WINDOWS_BUILD),1)
@@ -1177,6 +1149,18 @@ endef
 
 #all: $(ROM)
 all: $(EXE)
+
+export BUILD_DIR \
+	OSX_BUILD WINDOWS_BUILD\
+	TARGET_N64 TARGET_RPI TARGET_RK3588\
+	TARGET_ARCH TARGET_BITS\
+	CC CXX CFLAGS CPPFLAGS LDFLAGS
+
+libraries:
+	@$(PRINT) "$(GREEN)Building static libraries: $(BLUE)$(STATIC_LIBRARIES) $(NO_COL)\n"
+	@$(MAKE) -C ./lib MAKE_LIBS="$(STATIC_LIBRARIES)" STATIC_MAKE_LIBS=1 --no-print-directory
+#@$(PRINT) "$(GREEN)Building shared libraries: $(BLUE)$(SHARED_LIBRARIES) $(NO_COL)\n"
+#@$(MAKE) -C ./lib --no-print-directory LIBS="$(SHARED_LIBRARIES)" SHARED=1
 
 ifeq ($(WINDOWS_BUILD),1)
 MAPFILE = $(BUILD_DIR)/coop.map
@@ -1565,7 +1549,7 @@ ifeq ($(TARGET_N64),1)
   $(BUILD_DIR)/$(TARGET).objdump: $(ELF)
 	$(OBJDUMP) -D $< > $@
 else
-  $(EXE): $(O_FILES) $(MIO0_FILES:.mio0=.o) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(BUILD_DIR)/$(RPC_LIBS) $(BUILD_DIR)/$(DISCORD_SDK_LIBS) $(BUILD_DIR)/$(COOPNET_LIBS) $(BUILD_DIR)/$(LANG_DIR) $(BUILD_DIR)/$(MOD_DIR) $(BUILD_DIR)/$(PALETTES_DIR)
+  $(EXE): $(O_FILES) libraries $(MIO0_FILES:.mio0=.o) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(BUILD_DIR)/$(RPC_LIBS) $(BUILD_DIR)/$(DISCORD_SDK_LIBS) $(BUILD_DIR)/$(COOPNET_LIBS) $(BUILD_DIR)/$(LANG_DIR) $(BUILD_DIR)/$(MOD_DIR) $(BUILD_DIR)/$(PALETTES_DIR)
 	@$(PRINT) "$(GREEN)Linking executable: $(BLUE)$@ $(NO_COL)\n"
 	$(V)$(LD) $(PROF_FLAGS) -L $(BUILD_DIR) -o $@ $(O_FILES) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(LDFLAGS)
 endif
