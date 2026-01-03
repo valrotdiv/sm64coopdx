@@ -931,12 +931,12 @@ endif
 # Coop specific libraries
 
 # Enter the libraries without the lib prefix, all library configs are in lib folder
-STATIC_LIBRARIES := lua
-SHARED_LIBRARIES :=
+STATIC_LIBRARIES :=
+SHARED_LIBRARIES := lua
 # CoopNet
 ifeq ($(COOPNET),1)
-  STATIC_LIBRARIES += coopnet
-  SHARED_LIBRARIES +=
+  STATIC_LIBRARIES +=
+  SHARED_LIBRARIES += coopnet
 # Include juice if coopnet is static
   ifneq (,$(findstring coopnet, $(STATIC_LIBRARIES)))
     STATIC_LIBRARIES += juice
@@ -953,6 +953,8 @@ else
   LDFLAGS += -lcurl
 endif
 
+# Include shared libraries
+LDFLAGS += -L. $(foreach name, $(SHARED_LIBRARIES), -l$(name))
 # Include directory for static libraries
 LDFLAGS += -L$(BUILD_DIR)/lib
 
@@ -1158,9 +1160,9 @@ export BUILD_DIR \
 
 libraries:
 	@$(PRINT) "$(GREEN)Building static libraries: $(BLUE)$(STATIC_LIBRARIES) $(NO_COL)\n"
-	@$(MAKE) -C ./lib MAKE_LIBS="$(STATIC_LIBRARIES)" STATIC_MAKE_LIBS=1 --no-print-directory
-#@$(PRINT) "$(GREEN)Building shared libraries: $(BLUE)$(SHARED_LIBRARIES) $(NO_COL)\n"
-#@$(MAKE) -C ./lib --no-print-directory LIBS="$(SHARED_LIBRARIES)" SHARED=1
+	@$(MAKE) -C ./lib MAKE_LIBS="$(STATIC_LIBRARIES)" --no-print-directory
+	@$(PRINT) "$(GREEN)Building shared libraries: $(BLUE)$(SHARED_LIBRARIES) $(NO_COL)\n"
+	@$(MAKE) -C ./lib --no-print-directory MAKE_LIBS="$(SHARED_LIBRARIES)" MAKE_SHARED_LIBS=1
 
 ifeq ($(WINDOWS_BUILD),1)
 MAPFILE = $(BUILD_DIR)/coop.map
@@ -1549,7 +1551,7 @@ ifeq ($(TARGET_N64),1)
   $(BUILD_DIR)/$(TARGET).objdump: $(ELF)
 	$(OBJDUMP) -D $< > $@
 else
-  $(EXE): $(O_FILES) libraries $(MIO0_FILES:.mio0=.o) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(BUILD_DIR)/$(RPC_LIBS) $(BUILD_DIR)/$(DISCORD_SDK_LIBS) $(BUILD_DIR)/$(COOPNET_LIBS) $(BUILD_DIR)/$(LANG_DIR) $(BUILD_DIR)/$(MOD_DIR) $(BUILD_DIR)/$(PALETTES_DIR)
+  $(EXE): $(O_FILES) $(MIO0_FILES:.mio0=.o) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(BUILD_DIR)/$(RPC_LIBS) $(BUILD_DIR)/$(DISCORD_SDK_LIBS) $(BUILD_DIR)/$(COOPNET_LIBS) $(BUILD_DIR)/$(LANG_DIR) $(BUILD_DIR)/$(MOD_DIR) $(BUILD_DIR)/$(PALETTES_DIR) libraries
 	@$(PRINT) "$(GREEN)Linking executable: $(BLUE)$@ $(NO_COL)\n"
 	$(V)$(LD) $(PROF_FLAGS) -L $(BUILD_DIR) -o $@ $(O_FILES) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(LDFLAGS)
 endif
