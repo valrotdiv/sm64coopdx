@@ -935,8 +935,8 @@ STATIC_LIBRARIES :=
 SHARED_LIBRARIES := lua
 # CoopNet
 ifeq ($(COOPNET),1)
-  STATIC_LIBRARIES +=
-  SHARED_LIBRARIES += coopnet
+  STATIC_LIBRARIES += coopnet
+  SHARED_LIBRARIES +=
 # Include juice if coopnet is static
   ifneq (,$(findstring coopnet, $(STATIC_LIBRARIES)))
     STATIC_LIBRARIES += juice
