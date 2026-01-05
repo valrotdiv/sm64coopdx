@@ -1573,6 +1573,9 @@ ifeq ($(OSX_BUILD),1)
   SDL2_LIB := $(shell find $(BREW_PREFIX)/Cellar/sdl2 | grep libSDL2- | sort -n | uniq)
 endif
 
+APP_BUNDLE_DIRS := mods lang dynos palettes
+APP_BUNDLE_LIBS := $(foreach lib,$(SHARED_LIBRARIES),lib$(lib).dylib)
+
 all:
 	@if [ "$(USE_APP)" = "0" ]; then \
 		rm -rf build/us_pc/sm64coopdx.app; \
@@ -1583,14 +1586,10 @@ all:
 		mkdir -p $(APP_MACOS_DIR); \
 		mkdir -p $(APP_RESOURCES_DIR); \
 		mv build/us_pc/sm64coopdx $(APP_MACOS_DIR)/sm64coopdx; \
-    cp -r build/us_pc/mods $(APP_RESOURCES_DIR); \
-    cp -r build/us_pc/lang $(APP_RESOURCES_DIR); \
-    cp -r build/us_pc/dynos $(APP_RESOURCES_DIR); \
-    cp -r build/us_pc/palettes $(APP_RESOURCES_DIR); \
-		cp build/us_pc/discord_game_sdk.dylib $(APP_MACOS_DIR); \
+    $(foreach dir,$(APP_BUNDLE_DIRS),cp -r build/us_pc/$(dir) $(APP_RESOURCES_DIR);) \
+    $(foreach file,$(APP_BUNDLE_LIBS),cp build/us_pc/$(file) $(APP_MACOS_DIR);) \
+    cp build/us_pc/discord_game_sdk.dylib $(APP_MACOS_DIR); \
     cp build/us_pc/libdiscord_game_sdk.dylib $(APP_MACOS_DIR); \
-    cp build/us_pc/libcoopnet.dylib $(APP_MACOS_DIR); \
-    cp build/us_pc/libjuice.1.6.2.dylib $(APP_MACOS_DIR); \
     cp $(SDL2_LIB) $(APP_MACOS_DIR)/libSDL2.dylib; \
     install_name_tool -change $(BREW_PREFIX)/opt/sdl2/lib/libSDL2-2.0.0.dylib @executable_path/libSDL2.dylib $(APP_MACOS_DIR)/sm64coopdx; > /dev/null 2>&1 \
 		install_name_tool -id @executable_path/libSDL2.dylib $(APP_MACOS_DIR)/libSDL2.dylib; > /dev/null 2>&1 \
