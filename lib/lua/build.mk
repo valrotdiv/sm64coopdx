@@ -7,5 +7,5 @@ include makefile
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 # Lua shared library
-liblua.so: $(CORE_O) $(AUX_O) $(LIB_O)
+$(CORE_LIB): $(CORE_O) $(AUX_O) $(LIB_O)
 	$(CC) -o $@ $(MYLDFLAGS) $(CORE_O) $(AUX_O) $(LIB_O) $(LIBS) $(MYLIBS) $(DL)
