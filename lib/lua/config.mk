@@ -11,15 +11,16 @@ endif
 
 lua:
 	@echo "===== Building Lua ====="
+	@echo "$(OSX_BUILD): $(LUA_LDFLAGS)"
 	$(call git-clone,https://github.com/lua/lua.git,$(LUA_DIR))
 ifeq ($(MAKE_SHARED_LIBS),1)
-	$(MAKE) -f $(shell pwd)/lua/build.mk -C $(LUA_DIR) liblua.so \
+	@$(MAKE) -f $(shell pwd)/lua/build.mk -C $(LUA_DIR) liblua.so \
 	  MYCFLAGS="$(LUA_CFLAGS)" \
 	  MYLDFLAGS="$(SH_LDFLAGS) $(LUA_LDFLAGS)"
-	cp $(LUA_DIR)/liblua.so $(BUILD_DIR)/$(LIB_PREFIX)lua$(SH_EXT)
+	@cp $(LUA_DIR)/liblua.so $(BUILD_DIR)/$(LIB_PREFIX)lua$(SH_EXT)
 else
-	$(MAKE) -f  $(shell pwd)/lua/build.mk -C $(LUA_DIR) liblua.a \
+	@$(MAKE) -f  $(shell pwd)/lua/build.mk -C $(LUA_DIR) liblua.a \
 	  MYCFLAGS="$(LUA_CFLAGS)" \
 	  MYLDFLAGS="$(ST_LDFLAGS) $(LUA_LDFLAGS)"
-	cp $(LUA_DIR)/liblua.a $(BUILD_DIR)/lib/$(LIB_PREFIX)lua$(ST_EXT)
+	@cp $(LUA_DIR)/liblua.a $(BUILD_DIR)/lib/$(LIB_PREFIX)lua$(ST_EXT)
 endif
