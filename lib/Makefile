@@ -23,6 +23,9 @@ all: $(MAKE_LIBS)
 define git-clone
 	@if [ -d "$(2)" ]; then cd "$(2)" && git pull; else git clone $(1) "$(2)"; fi
 endef
+define replace-all
+	@sed -i.bak 's/$(1)/$(2)/g' $(3)
+endef
 
 ST_EXT := .a
 LIB_CFLAGS := -fPIC
