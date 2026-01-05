@@ -11,7 +11,7 @@ coopnet: juice
 	@$(MAKE) -C $(COOPNET_DIR) \
 	  OSX_BUILD="$(OSX_BUILD)" \
 	  OSX_ARM="$(OSX_ARM)" \
-	  CXXFLAGS="-Wall -Werror -Wno-unused-function -Wdeprecated-declarations -std=c++11 -fPIC -DJUICE_STATIC -g"
+	  CXXFLAGS="-Wall -Werror -Wno-unused-function -Wno-deprecated-declarations -std=c++11 -fPIC -DJUICE_STATIC -g"
 ifeq ($(MAKE_SHARED_LIBS),1)
 	@cp $(COOPNET_DIR)/bin/libcoopnet.so $(BUILD_DIR)/$(LIB_PREFIX)coopnet$(SH_EXT)
 else
