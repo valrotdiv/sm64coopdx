@@ -1,4 +1,4 @@
-name: Osx only
+name: OSX debug
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
 
       - name: Build the game
         run: |
-          gmake OSX_BUILD=1 -j$(sysctl -n hw.ncpu)
+          gmake OSX_BUILD=1
 
       - name: Code sign the app (Ad-Hoc)
         run: |
@@ -55,7 +55,7 @@ jobs:
 
       - name: Build the game
         run: |
-          gmake OSX_BUILD=1 -j$(sysctl -n hw.ncpu)
+          gmake OSX_BUILD=1
 
       - name: Code sign the app (Ad-Hoc)
         run: |
