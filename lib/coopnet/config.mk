@@ -15,7 +15,7 @@ coopnet: juice
 	  OSX_BUILD="$(OSX_BUILD)" \
 	  OSX_ARM="$(OSX_ARM)"
 ifeq ($(MAKE_SHARED_LIBS),1)
-	@cp $(COOPNET_DIR)/bin/libcoopnet.so $(BUILD_DIR)/$(LIB_PREFIX)coopnet$(SH_EXT)
+	@cp $(COOPNET_DIR)/bin/libcoopnet$(SH_EXT) $(BUILD_DIR)/$(LIB_PREFIX)coopnet$(SH_EXT)
 else
 	@cp $(COOPNET_DIR)/bin/libcoopnet.a $(BUILD_DIR)/lib/$(LIB_PREFIX)coopnet$(ST_EXT)
 endif
