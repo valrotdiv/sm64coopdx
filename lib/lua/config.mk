@@ -11,7 +11,6 @@ endif
 
 lua:
 	@echo "===== Building Lua ====="
-	@echo "$(OSX_BUILD): $(LUA_LDFLAGS)"
 	$(call git-clone,https://github.com/lua/lua.git,$(LUA_DIR))
 ifeq ($(MAKE_SHARED_LIBS),1)
 	@$(MAKE) -f $(shell pwd)/lua/build.mk -C $(LUA_DIR) liblua.so \
