@@ -1,4 +1,4 @@
-JUICE_DIR:=$(BUILD_DIR)/lib/juice
+JUICE_DIR := $(BUILD_DIR)/lib/juice
 
 juice:
 	@echo "===== Building Juice ====="
